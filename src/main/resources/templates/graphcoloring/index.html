@@ -1,0 +1,102 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Graph coloring problem</title>
+</head>
+<body>
+<h1>Graph coloring problem</h1>
+<p>
+"In graph theory, graph coloring is a special case of graph labeling; it is an assignment of
+labels traditionally called "colors" to elements of a graph subject to certain constraints.
+In its simplest form, it is a way of coloring the vertices of a graph such that no two adjacent
+vertices share the same color; this is called a vertex coloring." <i>Wikipedia</i>
+<br/>
+<b>More details: <a href="http://en.wikipedia.org/wiki/Graph_coloring">Wikipedia</a></b>
+</p>
+<h3>The number of vertices</h3>
+<form action="#" th:action="@{/graphcoloring/setvertexnumber}" method="post">
+<table>
+<tr>
+	<td>Number of vertices: </td>
+	<td><input type="text" th:value="${vertexNumber}" name="vertexNumber"/></td>
+	<td th:text="${vertexNumberError}"></td>
+</tr>
+<tr>
+	<td><input type="submit" value="Set"/></td>
+	<td></td>
+	<td></td>
+</tr>
+</table>
+</form>
+
+<div th:if="${vertexNumber>0}">
+<hr/>
+<h3>The set of edges</h3>
+<table>
+<tr>
+	<td width="150">Vertex 1.</td>
+	<td width="150">Vertex 2.</td>
+	<td></td>
+</tr>
+<tr th:each="edge, iterStat : ${edgeList}">
+	<td width="150" th:text="${edge.vertexA}"></td>
+	<td width="150" th:text="${edge.vertexB}"></td>
+	<td><a href="" th:href="@{/graphcoloring/removeedge/}+${iterStat.index}">Remove</a></td>
+</tr>
+</table>
+
+<h3>Add edge</h3>
+<form action="#" th:action="@{/graphcoloring/addedge}" method="post">
+<table>
+<tr>
+	<td>Vertex 1: </td>
+	<td>
+		<select name="vertexA">
+			<option th:each="option : ${vertexOptions}"
+			th:text="${option}" th:value="${option}"/>
+		</select>
+	</td>
+	<td th:text="${vertexAError}"></td>
+	<td>Vertex 2: </td>
+	<td>
+		<select name="vertexB">
+			<option th:each="option : ${vertexOptions}"
+			th:text="*{option}" th:value="*{option}"/>
+		</select>
+	</td>
+	<td th:text="${vertexBError}"></td>
+</tr>
+<tr>
+	<td><input type="submit" value="Add new edge"/></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+</table>
+</form>
+
+<a href="" th:href="@{/graphcoloring/solve}">SOLVE</a> |
+<a href="" th:href="@{/graphcoloring/clear}">Clear</a> |
+<a href="" th:href="@{/graphcoloring/clearsolution}">Clear solution</a>
+</div>
+
+<div th:if="${solution!=null}">
+<hr/>
+<table>
+	<tr>
+		<td width="150">Vertex</td>
+		<td width="150">Color</td>
+	</tr>
+	<tr th:each="vertex : ${solution.vertexList}">
+		<td th:text="${vertex.index}"></td>
+		<td th:text="${vertex.color}"></td>
+	</tr>
+</table>
+Number of colors: <span th:text="${-solution.getScore().getSoftScore()+1}"></span>
+Collision: <span th:text="${-solution.getScore().getHardScore()}"></span>
+</div>
+<a href="" th:href="@{/}">Back to the list of problems</a>
+</body>
+</html>
