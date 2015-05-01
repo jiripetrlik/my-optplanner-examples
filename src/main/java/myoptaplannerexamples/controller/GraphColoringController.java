@@ -22,6 +22,7 @@ import myoptaplannerexamples.graphcoloring.Graph;
 import myoptaplannerexamples.graphcoloring.Vertex;
 
 @Controller
+@Scope("session")
 @RequestMapping("/graphcoloring")
 public class GraphColoringController {
 	
