@@ -82,20 +82,35 @@ vertices share the same color; this is called a vertex coloring." <i>Wikipedia</
 <a href="" th:href="@{/graphcoloring/clearsolution}">Clear solution</a>
 </div>
 
-<div th:if="${solution!=null}">
-<hr/>
-<table>
-	<tr>
-		<td width="150">Vertex</td>
-		<td width="150">Color</td>
-	</tr>
-	<tr th:each="vertex : ${solution.vertexList}">
-		<td th:text="${vertex.index}"></td>
-		<td th:text="${vertex.color}"></td>
-	</tr>
-</table>
-Number of colors: <span th:text="${-solution.getScore().getSoftScore()+1}"></span>
-Collision: <span th:text="${-solution.getScore().getHardScore()}"></span>
+<div th:if="${future!=null}">
+	<div th:if="${future.isCancelled()==false and future.isDone()==false}">
+		<b>Please wait. I'm solving the problem. (The page will be <a href="" th:href="@{/knapsack}">refreshed</a>)</b>
+		<script type="text/javascript">
+		  setTimeout(function(){
+		    location = ''
+		  },2000)
+		</script>
+	</div>
+	
+	<div th:if="${future.isCancelled()==true}">
+		<b>Problem solving was canceled.</b>
+	</div>
+	
+	<div th:if="${future.isDone()==true}">
+		<hr/>
+		<table>
+			<tr>
+				<td width="150">Vertex</td>
+				<td width="150">Color</td>
+			</tr>
+			<tr th:each="vertex : ${future.get().getBestSolution().vertexList}">
+				<td th:text="${vertex.index}"></td>
+				<td th:text="${vertex.color}"></td>
+			</tr>
+		</table>
+		Number of colors: <span th:text="${-future.get().getBestSolution().getScore().getSoftScore()+1}"></span>
+		Collision: <span th:text="${-future.get().getBestSolution().getScore().getHardScore()}"></span>
+	</div>
 </div>
 <a href="" th:href="@{/}">Back to the list of problems</a>
 </body>

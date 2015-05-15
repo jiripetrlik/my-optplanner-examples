@@ -25,5 +25,10 @@
     	<forager>
       		<acceptedCountLimit>1000</acceptedCountLimit>
     	</forager>
+    	<termination>
+  			<terminationCompositionStyle>OR</terminationCompositionStyle>
+	    	<secondsSpentLimit>30</secondsSpentLimit>
+	    	<unimprovedSecondsSpentLimit>1</unimprovedSecondsSpentLimit>
+  		</termination>
   	</localSearch>
 </solver>

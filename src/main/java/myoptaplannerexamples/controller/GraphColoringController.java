@@ -3,9 +3,11 @@ package myoptaplannerexamples.controller;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.servlet.ServletContext;
 
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ import org.springframework.context.annotation.Scope;
 import myoptaplannerexamples.graphcoloring.Edge;
 import myoptaplannerexamples.graphcoloring.Graph;
 import myoptaplannerexamples.graphcoloring.Vertex;
+import myoptaplannerexamples.nonblocking.SolverExecutor;
+import myoptaplannerexamples.nonblocking.Task;
 
 @Controller
 @Scope("session")
@@ -33,7 +37,7 @@ public class GraphColoringController {
 		model.addAttribute("vertexOptions",this.vertexOptions());
 		model.addAttribute("edgeList",this.edgeList);
 		model.addAttribute("vertexList",this.vertexList);
-		model.addAttribute("solution",this.solution);
+		model.addAttribute("future",this.future);
 		
 		if(this.vertexNumber>0) {
 			model.addAttribute("vertexA",0);
@@ -65,7 +69,7 @@ public class GraphColoringController {
 			model.addAttribute("vertexOptions",this.vertexOptions());
 			model.addAttribute("edgeList",this.edgeList);
 			model.addAttribute("vertexList",this.vertexList);
-			model.addAttribute("solution",this.solution);
+			model.addAttribute("future",this.future);
 			
 			if(this.vertexNumber>0) {
 				model.addAttribute("vertexA",0);
@@ -110,7 +114,7 @@ public class GraphColoringController {
 			model.addAttribute("vertexOptions",this.vertexOptions());
 			model.addAttribute("edgeList",this.edgeList);
 			model.addAttribute("vertexList",this.vertexList);
-			model.addAttribute("solution",this.solution);
+			model.addAttribute("future",this.future);
 			
 			return "graphcoloring/index";
 		}	
@@ -140,8 +144,8 @@ public class GraphColoringController {
 		}
 		
 		Solver solver=solverFactory.buildSolver();
-		solver.solve(graph);
-		this.solution=(Graph) solver.getBestSolution();
+		Task<HardSoftScore> task=new Task<HardSoftScore>(solver, graph);
+		this.future=solverExecutor.submitTask(task);
 		
 		return "redirect:/graphcoloring";
 	}
@@ -151,14 +155,14 @@ public class GraphColoringController {
 		this.vertexNumber=0;
 		this.vertexList.clear();
 		this.edgeList.clear();
-		this.solution=null;
+		this.future=null;
 		
 		return "redirect:/graphcoloring";
 	}
 	
 	@RequestMapping("/clearsolution")
 	public String clearSolutionAction() {
-		this.solution=null;
+		this.future=null;
 		
 		return "redirect:/graphcoloring";
 	}
@@ -176,9 +180,12 @@ public class GraphColoringController {
 	private int vertexNumber=0;
 	private List<Vertex> vertexList=new ArrayList<Vertex>();
 	private List<Edge> edgeList=new ArrayList<Edge>();
-	
-	private Graph solution=null;
+
+	private Future<Solver> future=null;
 	
 	@Autowired
 	private ServletContext context;
+	
+	@Autowired
+	private SolverExecutor solverExecutor;
 }

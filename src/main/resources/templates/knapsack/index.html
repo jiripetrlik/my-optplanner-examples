@@ -73,23 +73,38 @@ most valuable items." <i>Wikipedia</i>
 <a her="" th:href="@{/knapsack/clear}">Clear</a> |
 <a her="" th:href="@{/knapsack/clearSolution}">Clear solution</a>
 
-<div th:if="${solution!=null}">
-<hr/>
-<h2>Solution</h2>
-Sum of value: <span th:text="${solution.getScore().getSoftScore()}"></span>
-<h3>List of accomodated objects</h3>
-<table>
-<tr>
-	<td width="100">Id</td>
-	<td width="150">Mass</td>
-	<td width="150">Value</td>
-</tr>
-<tr th:each="item : ${solution.getItems()}" th:if="${item.accomodated}">
-	<td th:text="${item.id}"></td>
-	<td th:text="${item.mass}"></td>
-	<td th:text="${item.value}"></td>
-</tr>
-</table>
+<div th:if="${future!=null}">
+	<hr/>
+	<div th:if="${future.isCancelled()==false and future.isDone()==false}">
+		<b>Please wait. I'm solving the problem. (The page will be <a href="" th:href="@{/knapsack}">refreshed</a>)</b>
+		<script type="text/javascript">
+		  setTimeout(function(){
+		    location = ''
+		  },2000)
+		</script>
+	</div>
+	
+	<div th:if="${future.isCancelled()==true}">
+		<b>Problem solving was canceled.</b>
+	</div>
+	
+	<div th:if="${future.isDone()==true}">
+		<h2>Solution</h2>
+		Sum of value: <span th:text="${future.get().getBestSolution().getScore().getSoftScore()}"></span>
+		<h3>List of accomodated objects</h3>
+		<table>
+		<tr>
+			<td width="100">Id</td>
+			<td width="150">Mass</td>
+			<td width="150">Value</td>
+		</tr>
+		<tr th:each="item : ${future.get().getBestSolution().getItems()}" th:if="${item.accomodated}">
+			<td th:text="${item.id}"></td>
+			<td th:text="${item.mass}"></td>
+			<td th:text="${item.value}"></td>
+		</tr>
+		</table>
+	</div>
 </div>
 <br/>
 <a href="" th:href="@{/}">Back to the list of problems</a>

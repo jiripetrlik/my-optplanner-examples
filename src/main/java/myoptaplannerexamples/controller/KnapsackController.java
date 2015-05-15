@@ -3,13 +3,17 @@ package myoptaplannerexamples.controller;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.servlet.ServletContext;
 import javax.validation.Valid;
 
 import myoptaplannerexamples.knapsack.Item;
 import myoptaplannerexamples.knapsack.Knapsack;
+import myoptaplannerexamples.nonblocking.SolverExecutor;
+import myoptaplannerexamples.nonblocking.Task;
 
+import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +38,7 @@ public class KnapsackController {
 		model.addAttribute("items",this.items);
 		model.addAttribute("capacity",this.capacity);
 		model.addAttribute("newItem",new Item());
-		model.addAttribute("solution",this.solution);
+		model.addAttribute("future",this.future);
 		
 		return "knapsack/index";
 	}
@@ -44,7 +48,7 @@ public class KnapsackController {
 		if(bindingResult.hasErrors()) {
 			model.addAttribute("items",this.items);
 			model.addAttribute("capacity",this.capacity);
-			model.addAttribute("solution",this.solution);
+			model.addAttribute("future",this.future);
 			
 			return "knapsack/index";
 		}
@@ -70,7 +74,7 @@ public class KnapsackController {
 		if(capacity<0) {
 			model.addAttribute("items",this.items);
 			model.addAttribute("newItem",new Item());
-			model.addAttribute("solution",this.solution);
+			model.addAttribute("future",this.future);
 			
 			model.addAttribute("capacityError","Knapsack capacity must be at least 0.");
 			
@@ -88,14 +92,14 @@ public class KnapsackController {
 		this.nextItemId=1;
 		this.items.clear();
 		this.capacity=DEFAULT_KNAPSACK_CAPACITY;
-		this.solution=null;
+		this.future=null;
 		
 		return "redirect:/knapsack";
 	}
 	
 	@RequestMapping("/clearSolution")
 	public String clearSolutionAction() {
-		this.solution=null;
+		this.future=null;
 		
 		return "redirect:/knapsack";
 	}
@@ -117,8 +121,8 @@ public class KnapsackController {
 		}
 		
 		Solver solver=solverFactory.buildSolver();
-		solver.solve(knapsack);
-		this.solution=(Knapsack) solver.getBestSolution();
+		Task<HardSoftScore> task=new Task<HardSoftScore>(solver, knapsack);
+		this.future=this.solverExecutor.submitTask(task);
 		
 		return "redirect:/knapsack";
 	}
@@ -127,8 +131,11 @@ public class KnapsackController {
 	private List<Item> items=new ArrayList<Item>();
 	private int capacity=DEFAULT_KNAPSACK_CAPACITY;
 	
-	private Knapsack solution=null;
+	private Future<Solver> future=null;
 	
 	@Autowired
 	private ServletContext context;
+	
+	@Autowired
+	private SolverExecutor solverExecutor;
 }
